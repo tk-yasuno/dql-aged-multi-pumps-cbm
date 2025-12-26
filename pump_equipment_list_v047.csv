@@ -1,4 +1,0 @@
-﻿equipment_id,equipment_name,current_age,main_measurement_id,measurement_name,aging_factor,expected_performance,convergence_episodes,stability_std,learning_type,output_directory,实用化_readiness,notes,実用化_readiness
-265715,薬注ポンプCP-500-5,19.7,526571,タンク残量,0.018,+19.32,303,20.97,stable_learner,outputs_pump_265715,A (実用化推奨),老朽化設備だが安定した学習性能、大幅改善+9.02達成,
-137953,冷却水ポンプCDP-A5,3.0,137953,電力点検,0.005,-3.07,271,42.45,special_difficulty,outputs_pump_137953,,特殊困難要因、電力系測定項目、大幅改善+55.33も依然マイナス,C (要更なる改善)
-519177,薬注ポンプCP-500-3,0.5,519177,タンク残量,0.003,+11.34,100,63.53,fast_learner,outputs_pump_519177,,最新設備、高速学習型、劇的改善+56.54達成も高変動性,B (改善継続)
