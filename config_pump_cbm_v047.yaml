@@ -1,0 +1,184 @@
+# Equipment CBM v0.4.7 Configuration
+# 3台ポンプ設備の包括的CBM保全管理（設置年月日データ活用）
+
+# Pump Equipment Configuration  
+# 設置年月日データ対応3台ポンプ設備の持続可能保全
+multi_equipment:
+  # 保全対象ポンプ設備（設置年月日データ有り、年数幅0.5～19.7年）
+  target_equipment_list:
+    # 薬注ポンプ系統 - 最老朽設備（19.7年経過）
+    - equipment_id: 265715
+      equipment_name: "薬注ポンプCP-500-5"
+      current_age: 19.7
+      main_measurement_id: 526571  # タンク残量
+      measurement_name: "タンク残量"
+      aging_factor: 0.018           # AgedRL_Lessonから実証値
+      expected_convergence: 303     # エピソード収束実績
+      performance_stability: 20.97  # 標準偏差実績
+      
+    - equipment_id: 137953  
+      equipment_name: "冷却水ポンプCDP-A5"
+      current_age: 3.0
+      main_measurement_id: 137953  # 電力点検
+      measurement_name: "電力点検"
+      aging_factor: 0.005           # 実証値
+      expected_convergence: 271     # エピソード収束実績
+      performance_stability: 42.45  # 標準偏差実績（高変動）
+      
+    - equipment_id: 519177
+      equipment_name: "薬注ポンプCP-500-3" 
+      current_age: 0.5
+      main_measurement_id: 519177  # タンク残量
+      measurement_name: "タンク残量"
+      aging_factor: 0.003           # 実証値
+      expected_convergence: 100     # エピソード収束実績（高速学習）
+      performance_stability: 63.53  # 標準偏差実績（高変動）
+
+# Environment Parameters
+environment:
+  # Real data-driven state transitions (Pump-specific)
+  use_real_data_transitions: true  # Use actual measurement data for transition matrices
+  
+  horizon: 120                    # Episode length (steps) - 10年間分
+  gamma: 0.95                     # Discount factor
+  cost_lambda: 0.1               # Cost penalty scaling factor
+  
+  # Temperature settings (pump-specific ranges)
+  temperature_range:
+    min: -10.0
+    max: 200.0
+  
+  # Normal range (will be set from pump measurement data)
+  normal_temp_range:
+    min: 0.0
+    max: 150.0
+    
+  # Equipment aging parameters (pump-specific)
+  aging:
+    initial_age: 0.0              # Will be overridden by actual ages
+    aging_factor: 0.008           # Base aging factor (adjusted per pump)
+    max_age: 50.0                 # Maximum equipment age for normalization
+    use_real_age: true            # Use real age data from installation dates
+
+# Reward Function for Pump CBM (optimized based on AgedRL_Lesson findings)
+reward:
+  risk:
+    normal: 20.0                  # 正常状態維持への強いインセンティブ
+    anomalous: -10.0              # 適度な異常状態ペナルティ
+  
+  cost:
+    do_nothing: 10.0              # 何もしないことのリスクコスト
+    repair: 5.0                   # ポンプ修理コスト
+    replace: 25.0                 # ポンプ交換コスト（空調より高め）
+    
+  # 保全費用平準化パラメータ（3台ポンプ用）
+  cost_leveling:
+    enabled: true                 # 保全費用平準化を有効にする
+    window_size: 12               # 保全費用計算ウィンドウ（月数）
+    target_monthly_budget: 30.0   # 目標月次保全予算（ポンプ3台用）
+    leveling_penalty_weight: 1.0  # バランス調整重み
+    variance_threshold: 15.0      # 許容する月次費用分散の閾値（厳格）
+
+# State Transition (Pump Equipment specific)
+transition:
+  # ポンプ設備別の遷移確率（実データから推定）
+  base_probabilities:
+    do_nothing:
+      normal_to_normal: 0.70        # ポンプは劣化が早い
+      normal_to_anomalous: 0.30     # 高い劣化リスク
+      anomalous_to_normal: 0.03     # 自然回復は困難
+      anomalous_to_anomalous: 0.97  # 異常状態の持続性高
+    
+    repair:
+      normal_to_normal: 0.93
+      normal_to_anomalous: 0.07
+      anomalous_to_normal: 0.70
+      anomalous_to_anomalous: 0.30
+    
+    replace:
+      normal_to_normal: 0.96
+      normal_to_anomalous: 0.04
+      anomalous_to_normal: 0.88
+      anomalous_to_anomalous: 0.12
+
+# DQN Training Parameters (pump optimized)
+training:
+  n_episodes: 2000                # 2000エピソード学習（AgedRL_Lesson実証値）
+  learning_rate: 5.0e-4           # Adam learning rate
+  batch_size: 128                 # Mini-batch size
+  buffer_size: 200000             # Replay buffer capacity
+  target_update_freq: 1000        # Target network update frequency
+  
+  # QR-DQN specific
+  n_quantiles: 51                 # Number of quantiles
+  kappa: 1.0                      # Huber loss threshold
+  
+  # Network architecture (pump-specific)
+  hidden_dims:
+    shared: [256, 128, 64]        # ポンプ特性に最適化
+    value: [64, 32]
+    advantage: [64, 32]
+  
+  # Noisy Networks
+  sigma_init: 0.5                 # Initial noise scale
+
+# Evaluation
+evaluation:
+  n_episodes: 20                  # Number of test episodes
+  render: false                   # Render episodes
+
+# Output (pump-specific naming)
+output:
+  save_dir: "C:/Users/yasun/RL/dql-aged-multi-equipment-cbm/pump_case/outputs_pump_cbm_v047_enhanced"
+  save_frequency: 500             # Save checkpoint every N episodes (1000、2000ep時に保存)
+  log_cost_leveling: true         # 保全費用平準化のログを出力
+
+# Random Seed
+seed: 42
+
+# Pump-Equipment Specific Settings
+pump_equipment_settings:
+  # ポンプ設備間の相関を考慮するか
+  consider_equipment_correlation: true
+  
+  # 同時保全割引（複数ポンプを同時に保全する場合のコスト削減）
+  simultaneous_maintenance_discount: 0.20  # 20% discount (空調より高)
+  
+  # ポンプタイプ別の重み（AgedRL_Lesson実証ベース）
+  equipment_type_weights:
+    pump_tank: 1.1      # 薬注ポンプ（タンク系）- やや高重要度
+    pump_cooling: 1.3   # 冷却水ポンプ - 高重要度（学習困難対応）
+  
+  # ポンプ設備特有の学習パラメータ
+  pump_learning_params:
+    # 設備別学習時間最適化（AgedRL_Lesson実証値）
+    equipment_specific_episodes:
+      265715: 400       # 薬注ポンプCP-500-5：安定学習型
+      137953: 2000      # 冷却水ポンプCDP-A5：特殊困難要因
+      519177: 200       # 薬注ポンプCP-500-3：高速学習型
+    
+    # 年数別学習特性調整
+    age_based_adjustments:
+      young_equipment: # 0-5年
+        learning_rate_multiplier: 1.2
+        exploration_boost: 0.1
+      mature_equipment: # 15-20年  
+        stability_weight: 1.5
+        convergence_patience: 1.5
+
+# Multi-scenario learning support
+scenarios:
+  # バランス型（基本戦略）
+  balanced:
+    reward_weights: [1.0, 1.0, 1.0]
+    output_suffix: "_balanced"
+  
+  # コスト効率重視
+  cost_efficient: 
+    reward_weights: [0.8, 1.2, 0.9]
+    output_suffix: "_cost_efficient"
+  
+  # 安全性重視
+  safety_first:
+    reward_weights: [1.3, 0.7, 1.1] 
+    output_suffix: "_safety_first"

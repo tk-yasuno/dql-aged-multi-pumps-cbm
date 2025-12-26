@@ -1,0 +1,21 @@
+# Core ML/DL Libraries
+torch>=1.8.0
+numpy>=1.20.0
+pandas>=1.3.0
+
+# Reinforcement Learning
+gymnasium>=0.28.0
+
+# Data Visualization
+matplotlib>=3.3.0
+seaborn>=0.11.0
+
+# Configuration & Data Processing
+pyyaml>=5.4.0
+scipy>=1.7.0
+
+# Progress Bars & CLI
+tqdm>=4.60.0
+
+# Optional: For enhanced analysis
+scikit-learn>=1.0.0

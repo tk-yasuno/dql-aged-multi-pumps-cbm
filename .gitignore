@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch
+*.pth
+*.pt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+outputs_*/
+!outputs_*/*.png
+comparison_results_*/
+!comparison_results_*/*.png
+*.log
+*.tmp
+
+# Development and testing files
+debug_*
+test_*
+check_*
+
+# Data files (if containing sensitive information)
+data/
+
+# Equipment lists (confidential)
+pump_equipment_list_*
+pump_equipment_list_v047.csv
+Pump_Equipment_List_v047.md
+list_pump_equipment_v047.py
