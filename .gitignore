@@ -56,6 +56,9 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
+# Log directories
+0_LogBAK/
+
 # Project specific
 outputs_*/*
 !outputs_*/*.png
