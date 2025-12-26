@@ -57,10 +57,13 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-outputs_*/
+outputs_*/*
 !outputs_*/*.png
-comparison_results_*/
+!outputs_*/
+outputs_pump_cbm_v047_enhanced/
+comparison_results_*/*
 !comparison_results_*/*.png
+!comparison_results_*/
 *.log
 *.tmp
 
